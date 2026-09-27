@@ -15,7 +15,8 @@ import {
   Paperclip, 
   X, 
   Eye, 
-  UploadCloud 
+  UploadCloud,
+  Phone
 } from 'lucide-react';
 
 interface Props {
@@ -148,9 +149,21 @@ export default function UserSupportChat({ user, onUpdateUser }: Props) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto bg-black/50 border border-neutral-800 px-3 py-1.5 rounded-full text-xs">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-          <span className="text-gray-300 font-medium">Admin Support Online</span>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <a
+            href="https://wa.me/2349131376638"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/50 text-emerald-300 hover:text-white px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+            title="Chat directly on WhatsApp"
+          >
+            <Phone className="w-3.5 h-3.5 text-emerald-400" />
+            <span>WhatsApp: 09131376638</span>
+          </a>
+          <div className="flex items-center gap-2 bg-black/50 border border-neutral-800 px-3 py-1.5 rounded-full text-xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+            <span className="text-gray-300 font-medium">Admin Online</span>
+          </div>
         </div>
       </div>
 

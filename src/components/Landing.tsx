@@ -312,7 +312,25 @@ export default function Landing({ onOpenAuth }: Props) {
                   </div>
                   <div>
                     <h4 className="font-bold mb-1">WhatsApp & Call</h4>
-                    <p className="text-gray-400 text-sm">+234 800 ZARU 00</p>
+                    <div className="flex flex-col gap-1">
+                      <a 
+                        href="https://wa.me/2349131376638" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-gray-300 hover:text-[#00A86B] transition-colors text-sm font-mono flex items-center gap-2"
+                      >
+                        <span>09131376638</span>
+                        <span className="text-[11px] bg-emerald-950/80 text-emerald-400 border border-emerald-500/40 px-2 py-0.5 rounded-full font-sans">
+                          Chat on WhatsApp
+                        </span>
+                      </a>
+                      <a 
+                        href="tel:09131376638" 
+                        className="text-gray-500 hover:text-gray-300 transition-colors text-xs font-mono"
+                      >
+                        +234 913 137 6638 (Direct Line)
+                      </a>
+                    </div>
                   </div>
                 </div>
 
@@ -412,6 +430,19 @@ export default function Landing({ onOpenAuth }: Props) {
           </p>
         </div>
       </footer>
+
+      {/* Floating WhatsApp Quick Action */}
+      <a
+        href="https://wa.me/2349131376638"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-40 bg-[#00A86B] hover:bg-[#008f5b] text-white px-4 py-3 rounded-full shadow-2xl flex items-center gap-2.5 font-medium text-sm transition-all transform hover:scale-105 group border border-emerald-400/40"
+        title="Chat with ZARU Enterprise on WhatsApp (09131376638)"
+      >
+        <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
+        <Phone className="w-4 h-4 fill-white" />
+        <span className="font-semibold tracking-wide">WhatsApp Us (09131376638)</span>
+      </a>
 
     </div>
   );
