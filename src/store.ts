@@ -1,4 +1,13 @@
 import { User, Investment, SiteSettings, DEFAULT_SITE_SETTINGS, Withdrawal, PACKAGES, SupportMessage, AdminNotification } from './types';
+import {
+  fetchAllDataFromSupabase,
+  saveUserProfileToSupabase,
+  saveInvestmentToSupabase,
+  saveWithdrawalToSupabase,
+  saveSupportMessageToSupabase,
+  saveAdminNotificationToSupabase,
+  setupSupabaseRealtimeSubscriptions
+} from './lib/supabaseService';
 
 const USERS_KEY = 'saposa_users';
 const SETTINGS_KEY = 'saposa_site_settings';
@@ -78,6 +87,7 @@ export const createStoreUser = (user: Omit<User, 'id' | 'referralCode' | 'referr
   };
   users.push(newUser);
   saveStoreUsers(users);
+  saveUserProfileToSupabase(newUser, user.password);
   return newUser;
 };
 
@@ -87,6 +97,7 @@ export const updateStoreUser = (updatedUser: User) => {
   if (index !== -1) {
     users[index] = updatedUser;
     saveStoreUsers(users);
+    saveUserProfileToSupabase(updatedUser);
   }
 };
 
@@ -340,6 +351,8 @@ export const approveUserInvestment = (userId: string, investmentId: string) => {
       user.adminMessage = `Payment confirmed for ${investment.packageName}! Your 14-day dividend cycle is active and now counting.`;
 
       saveStoreUsers(users);
+      saveInvestmentToSupabase(investment, user.id);
+      saveUserProfileToSupabase(user);
       return user;
     }
   }
@@ -375,6 +388,8 @@ export const addInvestmentToUser = (userId: string, investment: Omit<Investment,
     }
     user.investments.push(newInvestment);
     saveStoreUsers(users);
+    saveInvestmentToSupabase(newInvestment, user.id);
+    saveUserProfileToSupabase(user);
 
     // Notify Admin of new payment submission
     addAdminNotification({
@@ -429,6 +444,8 @@ export const addWithdrawalToUser = (
   }
 
   saveStoreUsers(users);
+  saveWithdrawalToSupabase(newWithdrawal);
+  saveUserProfileToSupabase(user);
 
   // Notify Admin of withdrawal request
   addAdminNotification({
@@ -463,6 +480,8 @@ export const updateWithdrawalStatus = (
       withdrawal.adminNote = adminNote;
     }
     saveStoreUsers(users);
+    saveWithdrawalToSupabase(withdrawal);
+    saveUserProfileToSupabase(user);
     return user;
   }
   return null;
@@ -554,6 +573,7 @@ export const addUserSupportMessage = (
 
   user.supportMessages.push(newMsg);
   saveStoreUsers(users);
+  saveSupportMessageToSupabase(newMsg, user.id);
 
   // Notify Admin of message/inquiry
   addAdminNotification({
@@ -605,6 +625,8 @@ export const addAdminSupportMessage = (
     user.adminMessage = text!.trim(); // sync with adminMessage for backwards compatibility
   }
   saveStoreUsers(users);
+  saveSupportMessageToSupabase(newMsg, user.id);
+  saveUserProfileToSupabase(user);
   return user;
 };
 
@@ -689,6 +711,7 @@ export const addAdminNotification = (
   // Keep up to 100 recent notifications
   const trimmed = list.slice(0, 100);
   saveAdminNotifications(trimmed);
+  saveAdminNotificationToSupabase(newNotif);
 
   // If browser notification permission is granted, notify outside browser window too
   if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
@@ -733,4 +756,68 @@ export const deleteAdminNotification = (id: string) => {
 export const clearAdminNotifications = () => {
   saveAdminNotifications([]);
 };
+
+// -------------------------------------------------------------
+// SUPABASE FULL HYDRATION & REALTIME SYNC
+// -------------------------------------------------------------
+
+export const syncStoreWithSupabase = async () => {
+  try {
+    const { users, notifications, siteSettings } = await fetchAllDataFromSupabase();
+
+    if (users && users.length > 0) {
+      // Merge remote users with local users, preserving passwords
+      const localUsers = getStoreUsers();
+      const mergedUsers: User[] = [...localUsers];
+
+      users.forEach(remoteUser => {
+        const localIndex = mergedUsers.findIndex(u => u.id === remoteUser.id || u.email === remoteUser.email);
+        if (localIndex >= 0) {
+          mergedUsers[localIndex] = {
+            ...remoteUser,
+            password: mergedUsers[localIndex].password || remoteUser.password
+          };
+        } else {
+          mergedUsers.push(remoteUser);
+        }
+      });
+
+      saveStoreUsers(mergedUsers);
+    }
+
+    if (notifications && notifications.length > 0) {
+      const localNotifs = getAdminNotifications();
+      const notifMap = new Map<string, AdminNotification>();
+      localNotifs.forEach(n => notifMap.set(n.id, n));
+      notifications.forEach(n => notifMap.set(n.id, n));
+      const combined = Array.from(notifMap.values()).sort(
+        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+      saveAdminNotifications(combined.slice(0, 100));
+    }
+
+    if (siteSettings) {
+      saveSiteSettings(siteSettings);
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('saposa_store_synced'));
+    }
+  } catch (err) {
+    console.warn('Initial Supabase sync completed with warning:', err);
+  }
+};
+
+export const initSupabaseSync = () => {
+  // 1. Initial fetch from Supabase
+  syncStoreWithSupabase();
+
+  // 2. Set up real-time postgres changes listener
+  const unsubscribe = setupSupabaseRealtimeSubscriptions(() => {
+    syncStoreWithSupabase();
+  });
+
+  return unsubscribe;
+};
+
 

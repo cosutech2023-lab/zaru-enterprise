@@ -4,7 +4,7 @@ import UserDashboard from './components/UserDashboard';
 import AdminDashboard from './components/AdminDashboard';
 import AuthModal from './components/AuthModal';
 import { User } from './types';
-import { getStoreUsers, updateStoreUser } from './store';
+import { getStoreUsers, updateStoreUser, initSupabaseSync } from './store';
 
 type ViewState = 'landing' | 'user' | 'admin';
 
@@ -13,8 +13,11 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authModalConfig, setAuthModalConfig] = useState<{ isOpen: boolean, mode: 'login' | 'register' | 'admin' }>({ isOpen: false, mode: 'login' });
 
-  // Check if session exists (simplified auth via localStorage)
+  // Initialize Supabase sync and check if session exists
   useEffect(() => {
+    // Start Supabase hydration and real-time syncing
+    const unsubscribe = initSupabaseSync();
+
     const sessionUserId = localStorage.getItem('saposa_session');
     if (sessionUserId === 'admin') {
       setView('admin');
@@ -26,6 +29,24 @@ export default function App() {
         setView('user');
       }
     }
+
+    const handleSynced = () => {
+      const currentSessionId = localStorage.getItem('saposa_session');
+      if (currentSessionId && currentSessionId !== 'admin') {
+        const freshUsers = getStoreUsers();
+        const freshUser = freshUsers.find(u => u.id === currentSessionId);
+        if (freshUser) {
+          setCurrentUser(freshUser);
+        }
+      }
+    };
+
+    window.addEventListener('saposa_store_synced', handleSynced);
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+      window.removeEventListener('saposa_store_synced', handleSynced);
+    };
   }, []);
 
   const handleOpenAuth = (mode: 'login' | 'register' | 'admin') => {

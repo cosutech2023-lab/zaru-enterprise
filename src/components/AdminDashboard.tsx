@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, Withdrawal, Investment } from '../types';
-import { getStoreUsers, updateStoreUser, deleteStoreUser, calculateUserProgress, approveUserInvestment, updateWithdrawalStatus, fastForwardInvestmentDays, getDividendCycleStatus, setUserCommitmentProgress } from '../store';
-import { Users, ShieldAlert, CheckCircle, XCircle, Search, Edit2, Trash2, AlertCircle, Settings, ArrowDownCircle, Clock, Copy, Check, Building2, Wallet, DollarSign, Filter, RefreshCw, FileText, Eye, Lock, Unlock, FastForward, TrendingUp, Sliders, RotateCcw, MessageSquare, ArrowRight } from 'lucide-react';
+import { getStoreUsers, updateStoreUser, deleteStoreUser, calculateUserProgress, approveUserInvestment, updateWithdrawalStatus, fastForwardInvestmentDays, getDividendCycleStatus, setUserCommitmentProgress, syncStoreWithSupabase } from '../store';
+import { Users, ShieldAlert, CheckCircle, XCircle, Search, Edit2, Trash2, AlertCircle, Settings, ArrowDownCircle, Clock, Copy, Check, Building2, Wallet, DollarSign, Filter, RefreshCw, FileText, Eye, Lock, Unlock, FastForward, TrendingUp, Sliders, RotateCcw, MessageSquare, ArrowRight, Database } from 'lucide-react';
 import SiteSettingsEditor from './SiteSettingsEditor';
 import ProofViewerModal from './ProofViewerModal';
 import AdminSupportChat from './AdminSupportChat';
@@ -35,6 +35,14 @@ export default function AdminDashboard({ onLogout }: Props) {
 
   useEffect(() => {
     setUsers(getStoreUsers());
+
+    const handleSynced = () => {
+      setUsers(getStoreUsers());
+    };
+    window.addEventListener('saposa_store_synced', handleSynced);
+    return () => {
+      window.removeEventListener('saposa_store_synced', handleSynced);
+    };
   }, []);
 
   const handleUpdateUser = () => {
@@ -236,13 +244,32 @@ export default function AdminDashboard({ onLogout }: Props) {
               <ShieldAlert className="text-red-600 w-8 h-8" />
               Admin Portal
             </h1>
-            <p className="text-gray-400 mt-1">Manage users, dividends, and withdrawals.</p>
+            <div className="flex flex-wrap items-center gap-2.5 mt-1.5">
+              <p className="text-gray-400 text-sm">Manage users, dividends, and withdrawals.</p>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono bg-emerald-950/80 border border-emerald-500/50 text-emerald-400">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <Database className="w-3 h-3 text-emerald-400" />
+                <span>Supabase Live</span>
+              </span>
+            </div>
           </div>
           <div className="flex items-center gap-3 self-start md:self-auto">
+            <button
+              type="button"
+              onClick={async () => {
+                await syncStoreWithSupabase();
+                setUsers(getStoreUsers());
+              }}
+              className="px-3 py-2 bg-neutral-900 border border-neutral-700 hover:border-neutral-500 rounded-xl text-xs font-medium text-gray-300 hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer"
+              title="Pull latest live records from Supabase PostgreSQL database"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="hidden sm:inline">Sync DB</span>
+            </button>
             <AdminNotificationBell onNavigateTab={handleNavigateFromNotification} />
             <button 
               onClick={onLogout}
-              className="px-6 py-2 border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors font-medium tracking-wide"
+              className="px-6 py-2 border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors font-medium tracking-wide cursor-pointer"
             >
               LOGOUT ADMIN
             </button>

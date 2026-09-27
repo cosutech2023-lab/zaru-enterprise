@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, PACKAGES, Package, Withdrawal, Investment } from '../types';
 import { updateStoreUser, addInvestmentToUser, calculateUserProgress, addWithdrawalToUser, getDividendCycleStatus, getUserCurrentActiveInvestments } from '../store';
+import { uploadProofToSupabaseStorage } from '../lib/supabaseService';
 import { Copy, TrendingUp, Calendar, Info, MessageSquare, AlertCircle, CheckCircle, Users, ArrowDownCircle, Clock, XCircle, Building2, ShieldCheck, Wallet, Eye, AlertTriangle, Lock, Unlock } from 'lucide-react';
 import ProofViewerModal from './ProofViewerModal';
 import UserSupportChat from './UserSupportChat';
@@ -226,6 +227,18 @@ export default function UserDashboard({ user, onLogout, onUpdateUser }: Props) {
 
     try {
       const processed = await processUploadedProof(proofFile);
+      setInvestMessage('Uploading proof to secure database...');
+      
+      let finalProofUrl = processed.dataUrl;
+      try {
+        const remoteUrl = await uploadProofToSupabaseStorage(processed.dataUrl, processed.name);
+        if (remoteUrl) {
+          finalProofUrl = remoteUrl;
+        }
+      } catch (storageErr) {
+        console.warn('Storage bucket upload fallback:', storageErr);
+      }
+
       const today = new Date();
       const withdrawalDate = new Date();
       withdrawalDate.setDate(today.getDate() + selectedPackage.durationDays);
@@ -236,7 +249,7 @@ export default function UserDashboard({ user, onLogout, onUpdateUser }: Props) {
         amount: amount,
         date: today.toISOString(),
         withdrawalDate: withdrawalDate.toISOString(),
-        proofOfPayment: processed.dataUrl,
+        proofOfPayment: finalProofUrl,
         proofFileName: processed.name,
         proofFileType: processed.type,
         proofFileSize: processed.size,
