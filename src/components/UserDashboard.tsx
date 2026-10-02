@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, PACKAGES, Package, Withdrawal, Investment } from '../types';
+import { User, PACKAGES, Package, Withdrawal, Investment, getPackageImage } from '../types';
 import { updateStoreUser, addInvestmentToUser, calculateUserProgress, addWithdrawalToUser, getDividendCycleStatus, getUserCurrentActiveInvestments } from '../store';
 import { uploadProofToSupabaseStorage } from '../lib/supabaseService';
 import { Copy, TrendingUp, Calendar, Info, MessageSquare, AlertCircle, CheckCircle, Users, ArrowDownCircle, Clock, XCircle, Building2, ShieldCheck, Wallet, Eye, AlertTriangle, Lock, Unlock } from 'lucide-react';
@@ -632,7 +632,19 @@ export default function UserDashboard({ user, onLogout, onUpdateUser }: Props) {
                 <tbody className="divide-y divide-neutral-800">
                   {user.investments.map(inv => (
                     <tr key={inv.id} className="hover:bg-neutral-800/50 transition-colors">
-                      <td className="px-6 py-4 font-medium">{inv.packageName}</td>
+                      <td className="px-6 py-4 font-medium">
+                        <div className="flex items-center gap-3">
+                          <img 
+                            src={getPackageImage(inv.packageId)} 
+                            alt={inv.packageName} 
+                            className="w-10 h-10 rounded-lg object-cover border border-neutral-700 flex-shrink-0"
+                          />
+                          <div>
+                            <div className="font-semibold text-white">{inv.packageName}</div>
+                            <div className="text-[11px] text-gray-500">14-Day Cycle</div>
+                          </div>
+                        </div>
+                      </td>
                       <td className="px-6 py-4 text-green-400 font-mono">{inv.amount.toLocaleString()}</td>
                       <td className="px-6 py-4 text-gray-400">{new Date(inv.date).toLocaleDateString()}</td>
                       <td className="px-6 py-4 text-gray-400">{new Date(inv.withdrawalDate).toLocaleDateString()}</td>
@@ -788,7 +800,7 @@ export default function UserDashboard({ user, onLogout, onUpdateUser }: Props) {
               <div key={pkg.id} className="bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden group hover:border-green-500/50 transition-colors">
                 <div className="h-48 overflow-hidden relative">
                   <img 
-                    src={pkg.image} 
+                    src={getPackageImage(pkg.id, pkg.image)} 
                     alt={pkg.name} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
@@ -842,11 +854,26 @@ export default function UserDashboard({ user, onLogout, onUpdateUser }: Props) {
                   setSelectedPackage(null);
                   setInvestMessage('');
                 }}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white"
+                className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-black/70 hover:bg-black text-gray-400 hover:text-white flex items-center justify-center transition-colors"
               >
                 ✕
               </button>
-              <h3 className="text-2xl font-bold mb-2">Buy {selectedPackage.name}</h3>
+              
+              <div className="h-40 -mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-5 overflow-hidden relative rounded-t-xl">
+                <img 
+                  src={getPackageImage(selectedPackage.id, selectedPackage.image)} 
+                  alt={selectedPackage.name} 
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/60 to-transparent" />
+                <div className="absolute bottom-3 left-6 sm:left-8 flex items-center gap-2">
+                  <span className="px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wider bg-[#00A86B] text-white shadow-lg">
+                    {selectedPackage.roi}% ROI • {selectedPackage.durationDays} Days
+                  </span>
+                </div>
+              </div>
+
+              <h3 className="text-2xl font-bold mb-1">Buy {selectedPackage.name}</h3>
               <p className="text-gray-400 mb-6 text-sm">Duration: {selectedPackage.durationDays} days • ROI: {selectedPackage.roi}%</p>
               
               <form onSubmit={handleInvest} className="space-y-4">

@@ -2,6 +2,33 @@ import snailImg from './assets/images/snail_investment_1788965586330.jpg';
 import fishImg from './assets/images/fish_investment_1788965609287.jpg';
 import poultryImg from './assets/images/poultry_investment_1788965621357.jpg';
 
+export { snailImg, fishImg, poultryImg };
+
+export const PACKAGE_IMAGES: Record<string, string> = {
+  snail: snailImg,
+  fish: fishImg,
+  poultry: poultryImg,
+};
+
+export const getPackageImage = (packageId?: string, fallbackUrl?: string): string => {
+  if (packageId) {
+    const normalized = packageId.toLowerCase();
+    if (normalized.includes('snail') || normalized === 'snail') {
+      return (fallbackUrl && fallbackUrl.startsWith('data:image')) ? fallbackUrl : snailImg;
+    }
+    if (normalized.includes('fish') || normalized === 'fish') {
+      return (fallbackUrl && fallbackUrl.startsWith('data:image')) ? fallbackUrl : fishImg;
+    }
+    if (normalized.includes('poultry') || normalized.includes('bird') || normalized === 'poultry') {
+      return (fallbackUrl && fallbackUrl.startsWith('data:image')) ? fallbackUrl : poultryImg;
+    }
+  }
+  if (fallbackUrl && fallbackUrl.trim().length > 0 && !fallbackUrl.includes('undefined')) {
+    return fallbackUrl;
+  }
+  return snailImg;
+};
+
 export interface SupportMessage {
   id: string;
   sender: 'user' | 'admin';

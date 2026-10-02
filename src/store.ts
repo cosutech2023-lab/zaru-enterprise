@@ -1,4 +1,4 @@
-import { User, Investment, SiteSettings, DEFAULT_SITE_SETTINGS, Withdrawal, PACKAGES, SupportMessage, AdminNotification } from './types';
+import { User, Investment, SiteSettings, DEFAULT_SITE_SETTINGS, Withdrawal, PACKAGES, SupportMessage, AdminNotification, getPackageImage } from './types';
 import {
   fetchAllDataFromSupabase,
   saveUserProfileToSupabase,
@@ -15,11 +15,29 @@ const ADMIN_NOTIFICATIONS_KEY = 'saposa_admin_notifications';
 
 export const getSiteSettings = (): SiteSettings => {
   const settings = localStorage.getItem(SETTINGS_KEY);
-  return settings ? JSON.parse(settings) : DEFAULT_SITE_SETTINGS;
+  if (!settings) return DEFAULT_SITE_SETTINGS;
+  try {
+    const parsed: SiteSettings = JSON.parse(settings);
+    const packages = (parsed.packages && parsed.packages.length > 0 ? parsed.packages : PACKAGES).map(pkg => ({
+      ...pkg,
+      image: getPackageImage(pkg.id, pkg.image)
+    }));
+    return {
+      ...DEFAULT_SITE_SETTINGS,
+      ...parsed,
+      packages
+    };
+  } catch (e) {
+    return DEFAULT_SITE_SETTINGS;
+  }
 };
 
 export const saveSiteSettings = (settings: SiteSettings) => {
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  const normalizedPackages = (settings.packages || PACKAGES).map(pkg => ({
+    ...pkg,
+    image: getPackageImage(pkg.id, pkg.image)
+  }));
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...settings, packages: normalizedPackages }));
 };
 
 export const getStoreUsers = (): User[] => {

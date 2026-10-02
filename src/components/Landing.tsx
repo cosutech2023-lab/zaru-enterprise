@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { SiteSettings } from '../types';
+import { SiteSettings, getPackageImage } from '../types';
 import { getSiteSettings } from '../store';
-import { Leaf, ShieldCheck, TrendingUp, Users, Mail, Phone, Lock } from 'lucide-react';
+import { Leaf, ShieldCheck, TrendingUp, Users, Mail, Phone } from 'lucide-react';
 
 const RECENT_INVESTMENTS = [
   { name: "Olamide J.", amount: "₦100,000", package: "Snail Investment", time: "2 mins ago" },
@@ -15,7 +15,7 @@ const RECENT_INVESTMENTS = [
 ];
 
 interface Props {
-  onOpenAuth: (mode: 'login' | 'register' | 'admin') => void;
+  onOpenAuth: (mode: 'login' | 'register') => void;
 }
 
 export default function Landing({ onOpenAuth }: Props) {
@@ -82,13 +82,6 @@ export default function Landing({ onOpenAuth }: Props) {
               >
                 BUY A PLAN
               </button>
-              <button 
-                onClick={() => onOpenAuth('admin')}
-                className="p-2.5 bg-neutral-900 border border-neutral-800 rounded hover:border-red-600 hover:text-red-600 transition-colors ml-2"
-                title="Admin Dashboard"
-              >
-                <Lock className="w-4 h-4" />
-              </button>
             </div>
 
             {/* Mobile Menu Button */}
@@ -116,9 +109,6 @@ export default function Landing({ onOpenAuth }: Props) {
               <div className="pt-4 flex flex-col gap-3 px-3">
                 <button onClick={() => onOpenAuth('login')} className="w-full py-3 border border-neutral-700 font-bold rounded">LOGIN</button>
                 <button onClick={() => onOpenAuth('register')} className="w-full py-3 bg-[#00A86B] font-bold rounded">BUY A PLAN</button>
-                <button onClick={() => onOpenAuth('admin')} className="w-full py-3 text-red-500 font-bold flex justify-center items-center gap-2">
-                  <Lock className="w-4 h-4" /> ADMIN LOGIN
-                </button>
               </div>
             </div>
           </div>
@@ -153,7 +143,7 @@ export default function Landing({ onOpenAuth }: Props) {
                 onClick={() => onOpenAuth('register')}
                 className="w-full sm:w-auto px-8 py-4 bg-[#00A86B] hover:bg-green-600 text-white font-bold rounded text-lg transition-transform hover:scale-105 active:scale-95"
               >
-                START INVESTING
+                PICK A PLANE
               </button>
               <button 
                 onClick={() => scrollTo('packages')}
@@ -260,7 +250,11 @@ export default function Landing({ onOpenAuth }: Props) {
             {settings.packages.map(pkg => (
               <div key={pkg.id} className="bg-black border border-neutral-800 rounded-xl overflow-hidden hover:border-[#00A86B] transition-colors group flex flex-col">
                 <div className="h-56 relative overflow-hidden">
-                  <img src={pkg.image} alt={pkg.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <img 
+                    src={getPackageImage(pkg.id, pkg.image)} 
+                    alt={pkg.name} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                  />
                   <div className="absolute top-4 right-4 bg-black/80 backdrop-blur text-white px-3 py-1 text-sm font-bold rounded border border-neutral-700">
                     {pkg.durationDays} Days
                   </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Withdrawal, Investment } from '../types';
+import { User, Withdrawal, Investment, getPackageImage } from '../types';
 import { getStoreUsers, updateStoreUser, deleteStoreUser, calculateUserProgress, approveUserInvestment, updateWithdrawalStatus, fastForwardInvestmentDays, getDividendCycleStatus, setUserCommitmentProgress, syncStoreWithSupabase } from '../store';
 import { Users, ShieldAlert, CheckCircle, XCircle, Search, Edit2, Trash2, AlertCircle, Settings, ArrowDownCircle, Clock, Copy, Check, Building2, Wallet, DollarSign, Filter, RefreshCw, FileText, Eye, Lock, Unlock, FastForward, TrendingUp, Sliders, RotateCcw, MessageSquare, ArrowRight, Database } from 'lucide-react';
 import SiteSettingsEditor from './SiteSettingsEditor';
@@ -1160,8 +1160,17 @@ export default function AdminDashboard({ onLogout }: Props) {
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="font-semibold text-gray-200">{inv.packageName}</div>
-                            <div className="text-xs text-gray-500">Matures: {inv.withdrawalDate ? new Date(inv.withdrawalDate).toLocaleDateString() : '14 days'}</div>
+                            <div className="flex items-center gap-2.5">
+                              <img 
+                                src={getPackageImage(inv.packageId)} 
+                                alt={inv.packageName} 
+                                className="w-8 h-8 rounded object-cover border border-neutral-700 flex-shrink-0"
+                              />
+                              <div>
+                                <div className="font-semibold text-gray-200">{inv.packageName}</div>
+                                <div className="text-xs text-gray-500">Matures: {inv.withdrawalDate ? new Date(inv.withdrawalDate).toLocaleDateString() : '14 days'}</div>
+                              </div>
+                            </div>
                           </td>
                           <td className="px-6 py-4 font-mono font-bold text-emerald-400">
                             ₦{inv.amount.toLocaleString()}

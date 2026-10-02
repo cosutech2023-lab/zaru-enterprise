@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SiteSettings, Package } from '../types';
+import { SiteSettings, Package, getPackageImage } from '../types';
 import { getSiteSettings, saveSiteSettings } from '../store';
 import { Upload, Save } from 'lucide-react';
 
@@ -186,7 +186,7 @@ export default function SiteSettingsEditor() {
               <div>
                 <label className="block text-xs text-gray-400 mb-1">Package Image</label>
                 <div className="flex gap-2 items-center">
-                  <img src={pkg.image} className="w-12 h-12 object-cover rounded" alt={pkg.name} />
+                  <img src={getPackageImage(pkg.id, pkg.image)} className="w-12 h-12 object-cover rounded" alt={pkg.name} />
                   <label className="flex-1 flex justify-center items-center gap-2 bg-neutral-800 px-2 py-2 rounded cursor-pointer hover:bg-neutral-700 text-xs">
                     <Upload size={14} />
                     <span>Upload</span>

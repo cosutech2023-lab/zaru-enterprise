@@ -1,10 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Provided Supabase configuration for ZARU ENTERPRISE
-const DEFAULT_SUPABASE_URL = 'https://civsvienryfifmxfgbtt.supabase.co';
-const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpdnN2aWVucnlmaWZteGZnYnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MTkzMTIsImV4cCI6MjEwNjA5NTMxMn0.12_yGSmW60fytoDNWHPkFI3qU4Z5jhCUYS8k4IyU6sU';
+// User's configured Supabase project for ZARU ENTERPRISE
+const DEFAULT_SUPABASE_URL = 'https://jzyhyaukweojueihvwtz.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6eWh5YXVrd2VvanVlaWh2d3R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1NDQ1NjAsImV4cCI6MjEwNjEyMDU2MH0.5iQbZ5O3Ooi-Yk5LwJU8gGTpIosMGVz9_TyOSE1esfk';
 
-export const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+// Helper to sanitize project URL in case /rest/v1 or trailing slash was included
+const sanitizeSupabaseUrl = (url: string): string => {
+  return url.replace(/\/rest\/v1\/?$/, '').replace(/\/$/, '');
+};
+
+const rawUrl = import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+export const supabaseUrl = sanitizeSupabaseUrl(rawUrl);
 export const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
 
 export const isSupabaseConfigured = Boolean(
