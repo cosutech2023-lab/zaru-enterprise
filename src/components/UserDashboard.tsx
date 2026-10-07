@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { User, PACKAGES, Package, Withdrawal, Investment, getPackageImage } from '../types';
 import { updateStoreUser, addInvestmentToUser, calculateUserProgress, addWithdrawalToUser, getDividendCycleStatus, getUserCurrentActiveInvestments } from '../store';
-import { uploadProofToSupabaseStorage } from '../lib/supabaseService';
+import { storage } from '../lib/firebase'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { Copy, TrendingUp, Calendar, Info, MessageSquare, AlertCircle, CheckCircle, Users, ArrowDownCircle, Clock, XCircle, Building2, ShieldCheck, Wallet, Eye, AlertTriangle, Lock, Unlock } from 'lucide-react';
 import ProofViewerModal from './ProofViewerModal';
 import UserSupportChat from './UserSupportChat';
@@ -12,7 +13,13 @@ interface Props {
   onUpdateUser: (user: User) => void;
 }
 
-const processUploadedProof = async (file: File): Promise<{ dataUrl: string; name: string; type: string; size: number }> => {
+  const processUploadedProof = async (file: File): Promise<string> => {
+     const fileName = `proofs/${Date.now()}_${file.name}`
+     const storageRef = ref(storage, fileName)
+     await uploadBytes(storageRef, file)
+     const url = await getDownloadURL(storageRef)
+     return url
+   }
   return new Promise((resolve, reject) => {
     if (file.type.startsWith('image/')) {
       const reader = new FileReader();
