@@ -1,13 +1,11 @@
 import { User, Investment, SiteSettings, DEFAULT_SITE_SETTINGS, Withdrawal, PACKAGES, SupportMessage, AdminNotification, getPackageImage } from './types';
-import {
-  fetchAllDataFromSupabase,
-  saveUserProfileToSupabase,
-  saveInvestmentToSupabase,
-  saveWithdrawalToSupabase,
-  saveSupportMessageToSupabase,
-  saveAdminNotificationToSupabase,
-  setupSupabaseRealtimeSubscriptions
-} from './lib/supabaseService';
+const fetchAllDataFromSupabase = async () => { return null }
+const saveUserProfileToSupabase = async (data: any) => {}
+const saveInvestmentToSupabase = async (data: any) => {}
+const saveWithdrawalToSupabase = async (data: any) => {}
+const saveSupportMessageToSupabase = async (data: any) => {}
+const saveAdminNotificationToSupabase = async (data: any) => {}
+const setupSupabaseRealtimeSubscriptions = () => { return () => {} }
 
 const USERS_KEY = 'saposa_users';
 const SETTINGS_KEY = 'saposa_site_settings';
