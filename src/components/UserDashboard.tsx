@@ -65,7 +65,7 @@ interface Props {
       reader.onerror = reject;
       reader.readAsDataURL(file);
     }
-  });
+
 };
 
 export default function UserDashboard({ user, onLogout, onUpdateUser }: Props) {
