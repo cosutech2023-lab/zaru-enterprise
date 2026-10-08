@@ -12,61 +12,13 @@ interface Props {
   onLogout: () => void;
   onUpdateUser: (user: User) => void;
 }
-
-  const processUploadedProof = async (file: File): Promise<string> => {
-     const fileName = `proofs/${Date.now()}_${file.name}`
-     const storageRef = ref(storage, fileName)
-     await uploadBytes(storageRef, file)
-     const url = await getDownloadURL(storageRef)
-     return url
-   }
-  return new Promise((resolve, reject) => {
-    if (file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const maxDimension = 1200;
-          let width = img.width;
-          let height = img.height;
-          if (width > maxDimension || height > maxDimension) {
-            if (width > height) {
-              height = Math.round((height * maxDimension) / width);
-              width = maxDimension;
-            } else {
-              width = Math.round((width * maxDimension) / height);
-              height = maxDimension;
-            }
-          }
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-            resolve({ dataUrl, name: file.name, type: 'image/jpeg', size: Math.round((dataUrl.length * 3) / 4) });
-          } else {
-            resolve({ dataUrl: e.target?.result as string, name: file.name, type: file.type, size: file.size });
-          }
-        };
-        img.onerror = () => {
-          resolve({ dataUrl: e.target?.result as string, name: file.name, type: file.type, size: file.size });
-        };
-        img.src = e.target?.result as string;
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    } else {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        resolve({ dataUrl: e.target?.result as string, name: file.name, type: file.type, size: file.size });
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    }
-
-};
+const processUploadedProof = async (file: File): Promise<string> => {
+  const fileName = `proofs/${Date.now()}_${file.name}`
+  const storageRef = ref(storage, fileName)
+  await uploadBytes(storageRef, file)
+  const url = await getDownloadURL(storageRef)
+  return url
+}
 
 export default function UserDashboard({ user, onLogout, onUpdateUser }: Props) {
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
