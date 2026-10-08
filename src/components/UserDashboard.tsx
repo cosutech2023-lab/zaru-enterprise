@@ -18,7 +18,7 @@ const processUploadedProof = async (file: File): Promise<string> => {
   await uploadBytes(storageRef, file)
   const url = await getDownloadURL(storageRef)
   return url
-
+}
 export default function UserDashboard({ user, onLogout, onUpdateUser }: Props) {
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [investmentAmount, setInvestmentAmount] = useState<string>('');
