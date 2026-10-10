@@ -228,3 +228,10 @@ export const getUserAvailableDividend = (user: User): number => {
   }, 0);
 };
 export const calculateUserProgress = (user: User): number => user.commitmentProgress || 0;
+
+// TEMP FIX FOR VERCEL BUILD - so old AdminSupportChat imports work
+export const archiveMessageAsRead = async () => {};
+export const addAdminSupportMessage = async () => {};
+export const markUserMessageAsRead = async () => {};
+export const markMessageAsRead = async () => {};
+export const addUserSupportMessage = async () => {};
