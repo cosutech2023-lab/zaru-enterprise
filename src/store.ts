@@ -229,9 +229,74 @@ export const getUserAvailableDividend = (user: User): number => {
 };
 export const calculateUserProgress = (user: User): number => user.commitmentProgress || 0;
 
-// TEMP FIX FOR VERCEL BUILD - so old AdminSupportChat imports work
-export const archiveMessageAsRead = async () => {};
-export const addAdminSupportMessage = async () => {};
-export const markUserMessageAsRead = async () => {};
-export const markMessageAsRead = async () => {};
-export const addUserSupportMessage = async () => {};
+// --- Support Chat - FIXED FOR VERCEL BUILD ---
+export const addUserSupportMessage = async (userId: string, text?: string, image?: string, imageName?: string) => {
+  try {
+    const users = getStoreUsers();
+    const user = users.find(u => u.id === userId);
+    if (!user) return null;
+    const newMsg: SupportMessage = {
+      id: Date.now().toString(),
+      sender: 'user',
+      text: text || '',
+      image,
+      imageName,
+      timestamp: new Date().toISOString(),
+      read: false
+    };
+    const updated = { ...user, supportMessages: [...(user.supportMessages || []), newMsg] };
+    await updateStoreUser(updated);
+    return updated;
+  } catch(e){ console.error(e); return null; }
+};
+
+export const addAdminSupportMessage = async (userId: string, text?: string, image?: string, imageName?: string) => {
+  try {
+    const users = getStoreUsers();
+    const user = users.find(u => u.id === userId);
+    if (!user) return null;
+    const newMsg: SupportMessage = {
+      id: Date.now().toString(),
+      sender: 'admin',
+      text: text || '',
+      image,
+      imageName,
+      timestamp: new Date().toISOString(),
+      read: false
+    };
+    const updated = { ...user, supportMessages: [...(user.supportMessages || []), newMsg] };
+    await updateStoreUser(updated);
+    return updated;
+  } catch(e){ console.error(e); return null; }
+};
+
+export const markUserMessagesAsRead = async (userId: string, reader: 'user' | 'admin') => {
+  try {
+    const users = getStoreUsers();
+    const user = users.find(u => u.id === userId);
+    if (!user) return null;
+    const updatedMessages = (user.supportMessages || []).map(m => {
+      if (reader === 'user' && m.sender === 'admin' && !m.read) return { ...m, read: true };
+      if (reader === 'admin' && m.sender === 'user' && !m.read) return { ...m, read: true };
+      return m;
+    });
+    const updated = { ...user, supportMessages: updatedMessages };
+    await updateStoreUser(updated);
+    return updated;
+  } catch(e){ console.error(e); return null; }
+};
+
+export const clearUserSupportMessages = async (userId: string) => {
+  try {
+    const users = getStoreUsers();
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+    const updated = { ...user, supportMessages: [] };
+    await updateStoreUser(updated);
+  } catch(e){ console.error(e); }
+};
+
+// keep old wrong names for compatibility
+export const archiveMessageAsRead = markUserMessagesAsRead;
+export const markUserMessageAsRead = markUserMessagesAsRead;
+export const markMessageAsRead = markUserMessagesAsRead;
