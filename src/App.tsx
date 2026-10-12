@@ -56,7 +56,7 @@ export default function App() {
     // Initial check
     updateRouteFromUrl();
 
-    // Start Supabase hydration and real-time syncing
+    // Start Firebase hydration and real-time syncing
     const unsubscribe = initFirebaseSync();
 
     const handleSynced = () => {
