@@ -189,7 +189,7 @@ export default function UserDashboard({ user, onLogout, onUpdateUser }: Props) {
       
       let finalProofUrl = processed.dataUrl;
       try {
-        const remoteUrl = await uploadProofToSupabaseStorage(processed.dataUrl, processed.name);
+        const remoteUrl = await uploadProofToFirebaseStorage(processed.dataUrl, processed.name);
         if (remoteUrl) {
           finalProofUrl = remoteUrl;
         }
