@@ -5,7 +5,7 @@ import AdminDashboard from './components/AdminDashboard';
 import AdminLoginPage from './components/AdminLoginPage';
 import AuthModal from './components/AuthModal';
 import { User } from './types';
-import { getStoreUsers, updateStoreUser, initSupabaseSync } from './store';
+import { getStoreUsers, updateStoreUser, initFirebaseSync } from './store';
 
 const checkIsAdminRoute = (): boolean => {
   if (typeof window === 'undefined') return false;
@@ -57,7 +57,7 @@ export default function App() {
     updateRouteFromUrl();
 
     // Start Supabase hydration and real-time syncing
-    const unsubscribe = initSupabaseSync();
+    const unsubscribe = initFirebaseSync();
 
     const handleSynced = () => {
       const currentSessionId = localStorage.getItem('saposa_session');
